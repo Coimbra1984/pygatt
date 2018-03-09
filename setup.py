@@ -35,7 +35,7 @@ setup(
     extras_require={
         'GATTTOOL': ["pexpect"],
     },
-    package_dir={'pygatt': 'pygatt'},
+    package_dir={'pygattpi': 'pygattpi'},
     zip_safe=False,
     include_package_data=True,
     classifiers=(
