@@ -31,6 +31,7 @@ class BLEDevice(object):
         self._address = address
         self._characteristics = {}
         self._callbacks = defaultdict(set)
+        self._disconnect_callback = None
         self._subscribed_handlers = {}
         self._lock = threading.Lock()
 
@@ -224,3 +225,22 @@ class BLEDevice(object):
             if handle in self._callbacks:
                 for callback in self._callbacks[handle]:
                     callback(handle, value)
+
+    def notify_disconnect(self, callback):
+        """
+        Register a callback for connection_disconnected packets. This callback
+        has one parameter 'reason' and no return value
+        """
+        self._disconnect_callback = callback
+
+    def receive_connection_disconnected(self, reason):
+        """
+        Receive a coinnection_disconnected event from the connected device
+        and propagate the value to the registered callback.
+        """
+
+        log.info('Received a connection_disconnect event with reason=0x%x',
+                 reason)
+        with self._lock:
+            if self._disconnect_callback:
+               self._disconnect_callback(reason)

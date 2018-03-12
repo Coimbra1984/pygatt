@@ -619,7 +619,7 @@ class BGAPIBackend(BLEBackend):
                                                 bytearray(args['value']))
                 elif packet_type == EventPacketType.connection_disconnected:
                     device = self._connections[args['connection_handle']]
-                    device.disconnected(args["reason"])
+                    device.receive_connection_disconnected(args["reason"])
                 self._receiver_queue.put(packet)
         log.info("Stopping receiver")
 
