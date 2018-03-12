@@ -726,11 +726,13 @@ class BGAPIBackend(BLEBackend):
         packet_type = constants.scan_response_packet_type[args['packet_type']]
         address = bgapi_address_to_hex(args['sender'])
         name, data_dict = self._scan_rsp_data(args['data'])
+        add_dev = True
 
-        # Store device information
         if address not in self._devices_discovered:
-            self._devices_discovered[address] = AdvertisingAndScanInfo()
-        dev = self._devices_discovered[address]
+            dev = AdvertisingAndScanInfo()
+        else:
+            dev = self._devices_discovered[address]
+
         if dev.name == "":
             dev.name = name
         if dev.address == "":
@@ -743,8 +745,15 @@ class BGAPIBackend(BLEBackend):
                   "and data=%s", address, args['rssi'], data_dict)
 
         if self._scan_cb is not None:
-            if self._scan_cb(self._devices_discovered, address, packet_type):
+            stop_scan, add_dev = self._scan_cb(self._devices_discovered,
+                                               dev,
+                                               packet_type)
+            if stop_scan:
                 self._evt.clear()
+
+        # Store device information
+        if add_dev and (address not in self._devices_discovered):
+            self._devices_discovered[address] = dev
 
     def _ble_evt_sm_bond_status(self, args):
         """
