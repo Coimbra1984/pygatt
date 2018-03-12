@@ -309,8 +309,8 @@ class BGAPIBackend(BLEBackend):
         scan_cb -- This callback function is called whenever a new BLE
                    advertising packet is received.
                    The function takes three parameters:
-                       devices, addr, packet_type
-                   If the function returns True, the scan is aborted
+                       devices, curDev, packet_type
+                   The function must return stop_scan, add_dev
         """
         self._scan_cb = scan_cb
         parameters = 1 if active else 0
