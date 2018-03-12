@@ -1,7 +1,7 @@
 import functools
 import logging
 
-from pygatt import BLEDevice, exceptions
+from pygattpi import BLEDevice, exceptions
 
 log = logging.getLogger(__name__)
 

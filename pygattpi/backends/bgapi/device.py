@@ -1,7 +1,7 @@
 import logging
 import time
 
-from pygatt import BLEDevice, exceptions
+from pygattpi import BLEDevice, exceptions
 from . import constants
 from .bgapi import BGAPIError
 from .error_codes import ErrorCode

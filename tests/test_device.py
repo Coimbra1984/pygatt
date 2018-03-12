@@ -3,8 +3,8 @@ import uuid
 from mock import MagicMock, patch
 from nose.tools import ok_, eq_
 
-from pygatt import BLEDevice
-from pygatt.backends import Characteristic
+from pygattpi import BLEDevice
+from pygattpi.backends import Characteristic
 
 
 class TestBLEDevice(BLEDevice):
