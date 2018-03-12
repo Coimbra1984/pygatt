@@ -617,6 +617,9 @@ class BGAPIBackend(BLEBackend):
                     device = self._connections[args['connection_handle']]
                     device.receive_notification(args['atthandle'],
                                                 bytearray(args['value']))
+                elif packet_type == EventPacketType.connection_disconnected:
+                    device = self._connections[args['connection_handle']]
+                    device.disconnected(args["reason"])
                 self._receiver_queue.put(packet)
         log.info("Stopping receiver")
 
