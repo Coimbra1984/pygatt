@@ -16,14 +16,14 @@ with open('CHANGELOG.rst') as f:
 setup(
     name=__title__,
     version=__version__,
-    description='Python Bluetooth LE (Low Energy) and GATT Library',
-    author='Chris Peplin <github@rhubarbtech.com>',
-    author_email='github@rhubarbtech.com',
+    description='Python Bluetooth LE (Low Energy) and GATT Library, forked from peplin/pygatt',
+    author='Markus Proeller <markus.proeller@pieye.org>',
+    author_email='markus.proeller@pieye.org',
     packages=find_packages(exclude=("tests", "tests.*")),
     package_data={'': ['LICENSE']},
     license="Apache 2.0 and MIT",
     long_description=readme + '\n\n' + changelog,
-    url='https://github.com/peplin/pygatt',
+    url='https://github.com/lemarquois/pygatt',
     install_requires=[
         'pyserial',
         'enum-compat'
