@@ -1,5 +1,5 @@
 __title__ = 'pygattpi'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __license__ = 'Apache License, Version 2.0 and MIT License'
 __copyright__ = 'Copyright 2015 Stratos Inc. and Orion Labs'
 
