@@ -741,9 +741,7 @@ class BGAPIBackend(BLEBackend):
             dev.name = name
         if dev.address == "":
             dev.address = address
-        if (packet_type not in dev.packet_data or
-                len(dev.packet_data[packet_type]) < len(data_dict)):
-            dev.packet_data[packet_type] = data_dict
+        dev.packet_data[packet_type] = data_dict
         dev.rssi = args['rssi']
         log.debug("Received a scan response from %s with rssi=%d dBM "
                   "and data=%s", address, args['rssi'], data_dict)
