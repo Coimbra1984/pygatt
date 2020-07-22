@@ -78,7 +78,7 @@ class BLEDevice(object):
         """
         raise NotImplementedError()
 
-    def char_write(self, uuid, value, wait_for_response=False):
+    def char_write(self, uuid, value, wait_for_response=False, no_response=False):
         """
         Writes a value to a given characteristic UUID.
 
@@ -91,9 +91,9 @@ class BLEDevice(object):
                                      bytearray([0x00, 0xFF]))
         """
         return self.char_write_handle(self.get_handle(uuid), value,
-                                      wait_for_response=wait_for_response)
+                                      wait_for_response=wait_for_response, no_response=no_response)
 
-    def char_write_handle(self, handle, value, wait_for_response=False):
+    def char_write_handle(self, handle, value, wait_for_response=False, no_response=False):
         """
         Writes a value to a given characteristic handle. This can be used to
         write to the characteristic config handle for a primary characteristic.

@@ -128,11 +128,17 @@ class BGAPIBLEDevice(BLEDevice):
         return bytearray(resp)
 
     @connection_required
-    def char_write_handle(self, char_handle, value, wait_for_response=False):
+    def char_write_handle(self, char_handle, value, wait_for_response=False, no_response=False):
 
         while True:
             value_list = [b for b in value]
-            if wait_for_response:
+            if no_response:
+                self._backend.send_command(
+                    CommandBuilder.attclient_write_command(
+                        self._handle, char_handle, value_list))
+                response = {}
+                response['result'] = "OK"
+            elif wait_for_response:
                 self._backend.send_command(
                     CommandBuilder.attclient_attribute_write(
                         self._handle, char_handle, value_list))
