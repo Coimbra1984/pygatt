@@ -5,18 +5,18 @@ from mock import patch, MagicMock
 import time
 import unittest
 
-from pygatt.backends import GATTToolBackend
+from pygattpi.backends import GATTToolBackend
 
 
 class GATTToolBackendTests(unittest.TestCase):
     def setUp(self):
         self.patchers = []
         self.patchers.append(
-            patch('pygatt.backends.gatttool.gatttool.pexpect.spawn'))
+            patch('pygattpi.backends.gatttool.gatttool.pexpect.spawn'))
         self.spawn = self.patchers[0].start()
         self.spawn.return_value.isalive.return_value = False
         self.patchers.append(
-            patch('pygatt.backends.gatttool.gatttool.subprocess'))
+            patch('pygattpi.backends.gatttool.gatttool.subprocess'))
         self.patchers[1].start()
 
         # Just keep saying we got the "Connected" response

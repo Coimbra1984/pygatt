@@ -3,9 +3,9 @@ import uuid
 from mock import MagicMock, patch
 from nose.tools import ok_, eq_, raises
 
-from pygatt.exceptions import NotConnectedError
-from pygatt.backends import Characteristic
-from pygatt.backends.gatttool.device import GATTToolBLEDevice
+from pygattpi.exceptions import NotConnectedError
+from pygattpi.backends import Characteristic
+from pygattpi.backends.gatttool.device import GATTToolBLEDevice
 
 
 class GATTToolBLEDeviceTests(unittest.TestCase):

@@ -1,7 +1,7 @@
 import logging
 import time
 
-from pygatt import BLEDevice, exceptions
+from pygattpi import BLEDevice, exceptions
 from . import constants
 from .bgapi import BGAPIError
 from .error_codes import ErrorCode
@@ -101,11 +101,44 @@ class BGAPIBLEDevice(BLEDevice):
         return bytearray(response['value'])
 
     @connection_required
-    def char_write_handle(self, char_handle, value, wait_for_response=False):
+    def char_read_long_handle(self, handle, timeout=None):
+        log.info("Reading long characteristic at handle %d", handle)
+        self._backend.send_command(
+            CommandBuilder.attclient_read_long(
+                self._handle, handle))
+
+        self._backend.expect(ResponsePacketType.attclient_read_long)
+        success = False
+        resp = b""
+        while not success:
+            matched_packet_type, response = self._backend.expect_any(
+                [EventPacketType.attclient_attribute_value,
+                 EventPacketType.attclient_procedure_completed],
+                timeout=timeout)
+
+            if (matched_packet_type ==
+                    EventPacketType.attclient_attribute_value):
+                if response['atthandle'] == handle:
+                    # Concatenate the data
+                    resp += response["value"]
+            elif (matched_packet_type ==
+                    EventPacketType.attclient_procedure_completed):
+                if response['chrhandle'] == handle:
+                    success = True
+        return bytearray(resp)
+
+    @connection_required
+    def char_write_handle(self, char_handle, value, wait_for_response=False, no_response=False):
 
         while True:
             value_list = [b for b in value]
-            if wait_for_response:
+            if no_response:
+                self._backend.send_command(
+                    CommandBuilder.attclient_write_command(
+                        self._handle, char_handle, value_list))
+                response = {}
+                response['result'] = "OK"
+            elif wait_for_response:
                 self._backend.send_command(
                     CommandBuilder.attclient_attribute_write(
                         self._handle, char_handle, value_list))

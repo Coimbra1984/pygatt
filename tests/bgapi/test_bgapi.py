@@ -6,13 +6,13 @@ import unittest
 
 import serial
 
-from pygatt.backends import BGAPIBackend
-from pygatt.backends.bgapi.bgapi import (bgapi_address_to_hex,
+from pygattpi.backends import BGAPIBackend
+from pygattpi.backends.bgapi.bgapi import (bgapi_address_to_hex,
                                          MAX_CONNECTION_ATTEMPTS)
-from pygatt.backends.bgapi.util import extract_vid_pid
-from pygatt.backends.bgapi.error_codes import get_return_message
-from pygatt.backends.bgapi import bglib
-from pygatt.exceptions import NotConnectedError
+from pygattpi.backends.bgapi.util import extract_vid_pid
+from pygattpi.backends.bgapi.error_codes import get_return_message
+from pygattpi.backends.bgapi import bglib
+from pygattpi.exceptions import NotConnectedError
 
 from .mocker import MockBGAPISerialDevice
 
@@ -29,11 +29,11 @@ class BGAPIBackendTests(unittest.TestCase):
 
         self.mock_device.stage_run_packets()
 
-        self.time_patcher = mock.patch('pygatt.backends.bgapi.bgapi.time')
+        self.time_patcher = mock.patch('pygattpi.backends.bgapi.bgapi.time')
         self.time_patcher.start()
 
         self.timeout_patcher = mock.patch(
-            'pygatt.backends.bgapi.bgapi._timed_out')
+            'pygattpi.backends.bgapi.bgapi._timed_out')
         timed_out = self.timeout_patcher.start()
         timed_out.return_value = True
 

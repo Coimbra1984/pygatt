@@ -1,5 +1,8 @@
-__title__ = 'pygatt'
-__version__ = '3.2.0'
+__title__ = 'pygattpi'
+if "GITHUB_REF" in os.environ:
+    __version__ = os.environ["GITHUB_REF"].split("/")[-1]
+else:
+    __version__ = "0.0.0"
 __license__ = 'Apache License, Version 2.0 and MIT License'
 __copyright__ = 'Copyright 2015 Stratos Inc. and Orion Labs'
 
@@ -16,14 +19,14 @@ with open('CHANGELOG.rst') as f:
 setup(
     name=__title__,
     version=__version__,
-    description='Python Bluetooth LE (Low Energy) and GATT Library',
-    author='Chris Peplin <github@rhubarbtech.com>',
-    author_email='github@rhubarbtech.com',
+    description='Python Bluetooth LE (Low Energy) and GATT Library, forked from peplin/pygatt',
+    author='Markus Proeller <markus.proeller@pieye.org>',
+    author_email='markus.proeller@pieye.org',
     packages=find_packages(exclude=("tests", "tests.*")),
     package_data={'': ['LICENSE']},
     license="Apache 2.0 and MIT",
     long_description=readme + '\n\n' + changelog,
-    url='https://github.com/peplin/pygatt',
+    url='https://github.com/lemarquois/pygatt',
     install_requires=[
         'pyserial',
         'enum-compat'
@@ -35,7 +38,7 @@ setup(
     extras_require={
         'GATTTOOL': ["pexpect"],
     },
-    package_dir={'pygatt': 'pygatt'},
+    package_dir={'pygattpi': 'pygattpi'},
     zip_safe=False,
     include_package_data=True,
     classifiers=(

@@ -1,4 +1,4 @@
-from pygatt.exceptions import BLEError
+from pygattpi.exceptions import BLEError
 
 
 class BGAPIError(BLEError):
