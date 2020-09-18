@@ -703,17 +703,27 @@ class BGAPIBackend(BLEBackend):
                 constants.connection_status_flag['connected']):
             # Disconnected
             self._connections.pop(connection_handle, None)
-
-        log.info("Connection status: handle=0x%x, flags=%s, address=0x%s, "
-                 "connection interval=%fms, timeout=%d, "
-                 "latency=%d intervals, bonding=0x%x",
+            
+        binary_flag = '{:04b}'.format(args['flags'])
+        
+        binary_index = ['connected','encrypted','connected_complete','changed_parameters']
+        connect_info = {}
+        for ix,x in enumerate(binary_flag):
+            boolval = True if x == '1' else False
+            index_val = binary_index[ix]
+            connect_info[index_val] = boolval
+                 
+        log.debug("\n\nConnection status: handle=0x%x, address=0x%s, "
+                 "\nconnection interval=%fms, timeout=%d, "
+                 "\nlatency=%d intervals, bonding=0x%x, "
+                 "\nflags=%s\n",
                  connection_handle,
-                 args['address'],
                  hexlify(bytearray(args['address'])),
                  args['conn_interval'] * 1.25,
                  args['timeout'] * 10,
                  args['latency'],
-                 args['bonding'])
+                 args['bonding'],
+                 connect_info)
 
     def _ble_evt_gap_scan_response(self, args):
         """

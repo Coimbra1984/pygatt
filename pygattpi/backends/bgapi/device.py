@@ -7,6 +7,7 @@ from .bgapi import BGAPIError
 from .error_codes import ErrorCode
 from .packets import BGAPICommandPacketBuilder as CommandBuilder
 from .bglib import EventPacketType, ResponsePacketType
+import json
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +50,82 @@ class BGAPIBLEDevice(BLEDevice):
         if packet_type == EventPacketType.sm_bonding_fail:
             raise BGAPIError("Bonding failed")
         log.info("Bonded to %s", self._address)
+    
+    @connection_required
+    def bond_wPin(self, pincode):
+        
+        log.debug("\n\n----\n\nConfig start\n")
+        
+        self._backend.set_bondable(True)
+                
+        #   Check prev Bond Status
+        self._backend.send_command(CommandBuilder.sm_get_bonds())
+        _,bond_info = self._backend.expect(ResponsePacketType.sm_get_bonds)
+        log.debug("\n\nBonding Info from %d connections fetched", bond_info['bonds'])
+        
+        if bond_info['bonds'] >= 1:
+            log.debug("\n\nDeleting previous Bonds...")
+            self._backend.send_command(CommandBuilder.sm_delete_bonding(self._handle))
+            self._backend.expect(ResponsePacketType.sm_delete_bonding)
+        
 
+        #  Clear Prev OOB Data
+        log.debug("\n\nClear OOB Data")
+        self._backend.send_command( 
+            CommandBuilder.sm_set_oob_data([])
+        )
+        self._backend.expect(ResponsePacketType.sm_set_oob_data)
+        
+        log.debug("\n\nActivate MITM-Protocoll")
+        parameters = {
+            'use_mitm':  {
+                'yes'   :   1,
+                'no'    :   0
+            },
+            'key_size'    :   7,
+            'io'    :   {
+                'displayonly'       :   0,
+                'display_bool'      :   1,
+                'keyboard'          :   2,
+                'noinput'           :   3,
+                'keyboarddisplay'   :   4
+            }
+        }
+        self._backend.send_command( 
+            CommandBuilder.sm_set_parameters(
+                parameters['use_mitm']['yes'],
+                parameters['key_size'],
+                parameters['io']['keyboarddisplay']
+            )
+        )
+        self._backend.expect(ResponsePacketType.sm_set_parameters)
+
+        #   Start Encryption
+        #   -> PASSKEY Request is triggert
+        log.debug("\n\nStart Encryption...")  
+        self._backend.send_command(CommandBuilder.sm_encrypt_start(self._handle, constants.bonding['create_bonding']))
+
+        encrypt_type,encrypt_cmd = self._backend.expect(ResponsePacketType.sm_encrypt_start)
+        if encrypt_type == ResponsePacketType.sm_encrypt_start and encrypt_cmd['result'] != 0:
+            log.debug('\n\nENCRYPTION FAILED WITH ERROR %d\n\n-', encrypt_cmd['result'])
+            raise BGAPIError("Encryption failed")
+        else: 
+            log.debug(encrypt_cmd)
+            log.debug('\n\nENCRYPTION STARTED SUCCESSFULLY')
+            self._handle = encrypt_cmd['handle']            
+            
+
+        packet_type,response = self._backend.expect(EventPacketType.sm_passkey_request,timeout=15)
+        if packet_type == EventPacketType.sm_passkey_request:
+            log.debug('\n\nPASSKEY EVENT TRIGGERT')
+            log.debug(self._handle)
+            self._backend.send_command(CommandBuilder.sm_passkey_entry(self._handle, pincode))
+            key_entry_packet,key_entry_result  = self._backend.expect(ResponsePacketType.sm_passkey_entry, timeout=5)
+            if key_entry_packet == ResponsePacketType.sm_passkey_entry:
+                log.debug(key_entry_result)
+ 
+        log.debug("\n\nConfig Done.\n\n----\n")    
+        
     @connection_required
     def get_rssi(self):
         """
