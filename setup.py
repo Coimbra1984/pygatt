@@ -1,3 +1,5 @@
+import os
+
 __title__ = 'pygattpi'
 if "GITHUB_REF" in os.environ:
     __version__ = os.environ["GITHUB_REF"].split("/")[-1]
