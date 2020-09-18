@@ -1,5 +1,8 @@
 __title__ = 'pygattpi'
-__version__ = '1.1.3'
+if "GITHUB_REF" in os.environ:
+    __version__ = os.environ["GITHUB_REF"].split("/")[-1]
+else:
+    __version__ = "0.0.0"
 __license__ = 'Apache License, Version 2.0 and MIT License'
 __copyright__ = 'Copyright 2015 Stratos Inc. and Orion Labs'
 
