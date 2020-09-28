@@ -98,7 +98,7 @@ class BLEDevice(object):
         Writes a value to a given characteristic handle. This can be used to
         write to the characteristic config handle for a primary characteristic.
 
-        hande -- the handle to write to.
+        handle -- the handle to write to.
         value -- a bytearray to write to the characteristic.
         wait_for_response -- wait for response after writing.
 
@@ -116,19 +116,6 @@ class BLEDevice(object):
         """
         raise NotImplementedError()
 
-    def _notification_handles(self, uuid):
-        # Expect notifications on the value handle...
-        value_handle = self.get_handle(uuid)
-
-        # but write to the characteristic config to enable notifications
-        # TODO with the BGAPI backend we can be smarter and fetch the actual
-        # characteristic config handle - we can also do that with gattool if we
-        # use the 'desc' command, so we'll need to change the "get_handle" API
-        # to be able to get the value or characteristic config handle.
-        characteristic_config_handle = value_handle + 1
-
-        return value_handle, characteristic_config_handle
-
     def subscribe(self, uuid, callback=None, indication=False):
         """
         Enable notifications or indications for a characteristic and register a
@@ -141,9 +128,24 @@ class BLEDevice(object):
                       more reliable, but slower.
         """
 
-        value_handle, characteristic_config_handle = (
-            self._notification_handles(uuid)
-        )
+        value_handle = self.get_handle(uuid)
+        self.subscribe_handle(value_handle, callback=callback, indication=indication)
+
+    def unsubscribe(self, uuid):
+        """
+        Disable notification for a characteristic and de-register the callback.
+        """
+
+        value_handle = self.get_handle(uuid)
+        self.unsubscribe_handle(value_handle)
+
+    def subscribe_handle(self, handle, callback=None, indication=False):
+        """
+        Like subscribe() but using handle instead of uuid.
+        handle -- handle as a integer of the characteristic to subscribe.
+        """
+        value_handle = handle
+        characteristic_config_handle = value_handle + 1
 
         properties = bytearray([
             0x2 if indication else 0x1,
@@ -160,18 +162,18 @@ class BLEDevice(object):
                     properties,
                     wait_for_response=False
                 )
-                log.info("Subscribed to uuid=%s", uuid)
+                log.info("Subscribed to handle=0x%04x", value_handle)
                 self._subscribed_handlers[value_handle] = properties
             else:
-                log.debug("Already subscribed to uuid=%s", uuid)
+                log.debug("Already subscribed to handle=0x%04x", value_handle)
 
-    def unsubscribe(self, uuid):
+    def unsubscribe_handle(self, handle):
         """
-        Disable notification for a charecteristic and de-register the callback.
+        Like unsubscribe() but using handle instead of uuid.
+        handle -- handle as a integer of the characteristic to unsubscribe.
         """
-        value_handle, characteristic_config_handle = (
-            self._notification_handles(uuid)
-        )
+        value_handle = handle
+        characteristic_config_handle = value_handle + 1
 
         properties = bytearray([0x0, 0x0])
 
@@ -185,9 +187,12 @@ class BLEDevice(object):
                     properties,
                     wait_for_response=False
                 )
-                log.info("Unsubscribed from uuid=%s", uuid)
+                log.info("Unsubscribed from handle=0x%04x", value_handle)
             else:
-                log.debug("Already unsubscribed from uuid=%s", uuid)
+                log.debug(
+                    "Already unsubscribed from handle=0x%04x",
+                    value_handle
+                )
 
     def get_handle(self, char_uuid):
         """
@@ -235,7 +240,7 @@ class BLEDevice(object):
 
     def receive_connection_disconnected(self, reason):
         """
-        Receive a coinnection_disconnected event from the connected device
+        Receive a connection_disconnected event from the connected device
         and propagate the value to the registered callback.
         """
 
